@@ -57,53 +57,50 @@
 			this.toolbar.find('a').on('click', function()
 			{
 				self[$(this).attr('class')]();
+				return false;
 			});
 
 			// Tabbing
-			$(this.element).on('keydown', function()
+			$(this.element).on('keydown', function(event)
 			{
 				if (event.keyCode === 9)
 				{
-					return self.tab();
+					self.tab(event);
+					return false;
 				}
 			});
 		},
 
 		strong: function()
 		{
-			this.replace(this.element, '**' + this.get(this.element).text + '**');
-			return false;
+			this.replace('**' + this.get().text + '**');
 		},
 
 		em: function()
 		{
-			this.replace(this.element, '*' + this.get(this.element).text + '*');
-			return false;
+			this.replace('*' + this.get().text + '*');
 		},
 
 		h1: function()
 		{
-			var text = this.get(this.element).text;
+			var text = this.get().text;
 			text += '\n' + Array(text.length + 1).join('-');
-			this.replace(this.element, text);
-			return false;
+			this.replace(text);
 		},
 
 		h2: function()
 		{
-			this.replace(this.element, '## ' + this.get(this.element).text);
-			return false;
+			this.replace('## ' + this.get().text);
 		},
 
 		h3: function()
 		{
-			this.replace(this.element, '### ' + this.get(this.element).text);
-			return false;
+			this.replace('### ' + this.get().text);
 		},
 
 		ol: function()
 		{
-			var rows = this.get(this.element).text.split('\n');
+			var rows = this.get().text.split('\n');
 			var replace = '';
 			var number = 1;
 
@@ -123,13 +120,12 @@
 				}
 			});
 
-			this.replace(this.element, replace.slice(0, -1));
-			return false;
+			this.replace(replace.slice(0, -1));
 		},
 
 		ul: function()
 		{
-			var rows = this.get(this.element).text.split('\n');
+			var rows = this.get().text.split('\n');
 			var replace = '';
 
 			$.each(rows, function(index, value)
@@ -147,45 +143,37 @@
 				}
 			});
 
-			this.replace(this.element, replace.slice(0, -1));
-			return false;
+			this.replace(replace.slice(0, -1));
 		},
 
 		a: function()
 		{
 			if (url = prompt('Enter your URL:'))
 			{
-				this.replace(this.element, '[' + this.get(this.element).text + '](' + url + ')');
+				this.replace('[' + this.get().text + '](' + url + ')');
 			}
-
-			return false;
 		},
 
 		blockquote: function()
 		{
-			this.replace(this.element, '> ' + this.get(this.element).text.split('\n').join('\n> '));
-			return false;
+			this.replace('> ' + this.get().text.split('\n').join('\n> '));
 		},
 
 		code: function()
 		{
-			this.replace(this.element, '    ' + this.get(this.element).text.split('\n').join('\n    '));
-			return false;
+			this.replace('    ' + this.get().text.split('\n').join('\n    '));
 		},
 
-		tab: function(event)
+		tab: function()
 		{
-			var selection = this.get(this.element);
-			var replace = '    ' + selection.text.split('\n').join('\n    ');
-
-			this.replace(this.element, replace);
-			this.selectionStart = this.selectionEnd = selection.end + (replace.length - selection.length);
-
-			return false;
+			var selection = this.get();
+			this.replace('    ' + selection.text.split('\n').join('\n    '), false);
 		},
 
-		get: function(e)
+		get: function()
 		{
+			var e = this.element;
+
 			return (
 
 				// Mozilla, Webkit
@@ -193,18 +181,29 @@
 				{
 					var l = e.selectionEnd - e.selectionStart;
 
-					return { start: e.selectionStart, end: e.selectionEnd, length: l, text: e.value.substr(e.selectionStart, l) };
+					return {
+						start: e.selectionStart,
+						end: e.selectionEnd,
+						length: l,
+						text: e.value.substr(e.selectionStart, l)
+					};
+
 				}) ||
 
-				// IE
+				// Internet Explorer
 				(document.selection && function()
 				{
-
 					e.focus();
 
 					var r = document.selection.createRange();
-					if (r === null) {
-						return { start: 0, end: e.value.length, length: 0 }
+
+					if (r === null)
+					{
+						return {
+							start: 0,
+							end: e.value.length,
+							length: 0
+						}
 					}
 
 					var re = e.createTextRange();
@@ -212,7 +211,13 @@
 					re.moveToBookmark(r.getBookmark());
 					rc.setEndPoint('EndToStart', re);
 
-					return { start: rc.text.length, end: rc.text.length + r.text.length, length: r.text.length, text: r.text };
+					return {
+						start: rc.text.length,
+						end: rc.text.length + r.text.length,
+						length: r.text.length,
+						text: r.text
+					};
+
 				}) ||
 
 				// Not supported
@@ -224,18 +229,33 @@
 			)();
 		},
 
-		replace: function(e, text)
+		replace: function(text, select)
 		{
+			var e = this.element;
+
 			return (
 
 				// Mozilla, Webkit
 				('selectionStart' in e && function()
 				{
+					var start = e.selectionStart;
 					e.value = e.value.substr(0, e.selectionStart) + text + e.value.substr(e.selectionEnd, e.value.length);
+
+					if (select === true || select === undefined)
+					{
+						e.selectionStart = start;
+						e.selectionEnd = start + text.length;
+					}
+					else
+					{
+						e.selectionStart = e.selectionEnd = start + text.length;
+					}
+
 					return this;
+
 				}) ||
 
-				// IE
+				// Internet Explorer
 				(document.selection && function()
 				{
 					e.focus();
@@ -251,7 +271,7 @@
 				}
 
 			)();
-		}
+		},
 
 	};
 
