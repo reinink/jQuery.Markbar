@@ -113,10 +113,10 @@
 			var self = this;
 
 			// Toolbar events
-			this.toolbar.find('a').on('click', function()
+			this.toolbar.find('a').on('click', function(event)
 			{
+				event.preventDefault();
 				self[$(this).attr('class')]();
-				return false;
 			});
 
 			// Tabbing
@@ -124,8 +124,8 @@
 			{
 				if (event.keyCode === 9)
 				{
+					event.preventDefault();
 					self.tab(event);
-					return false;
 				}
 			});
 		},
