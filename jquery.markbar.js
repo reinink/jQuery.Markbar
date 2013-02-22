@@ -15,36 +15,95 @@
 		h1: true,
 		h2: true,
 		h3: true,
-		ol: true,
 		ul: true,
+		ol: true,
 		a: true,
+		img: true,
 		blockquote: true,
 		code: true
 	};
 
-	function plugin(element, options)
+	function Plugin(element, options)
 	{
 		this.element = element;
 		this.options = $.extend({}, defaults, options);
 		this.init();
 	}
 
-	plugin.prototype =
+	Plugin.prototype =
 	{
 		init: function()
 		{
-			// Create markup
-			var html = '<div class="markbar">'
-			if (this.options.strong) html += '<a href="#strong" class="strong">Bold</a>';
-			if (this.options.em) html += '<a href="#em" class="em">Italicize</a>';
-			if (this.options.h1) html += '<a href="#h1" class="h1">Heading 1</a>';
-			if (this.options.h2) html += '<a href="#h2" class="h2">Heading 2</a>';
-			if (this.options.h3) html += '<a href="#h3" class="h3">Heading 3</a>';
-			if (this.options.ol) html += '<a href="#ol" class="ol">Ordered List</a>';
-			if (this.options.ul) html += '<a href="#ul" class="ul">Unordered List</a>';
-			if (this.options.a) html += '<a href="#a" class="a">Link</a>';
-			if (this.options.blockquote) html += '<a href="#blockquote" class="blockquote">Blockquote</a>';
-			if (this.options.code) html += '<a href="#code" class="code">Code</a>';
+			// Open div
+			var html = '<div class="markbar">';
+
+			// Add strong
+			if (this.options.strong)
+			{
+				html += '<a href="#strong" class="strong">Bold</a>';
+			}
+
+			// Add em
+			if (this.options.em)
+			{
+				html += '<a href="#em" class="em">Italicize</a>';
+			}
+
+			// Add h1
+			if (this.options.h1)
+			{
+				html += '<a href="#h1" class="h1">Heading 1</a>';
+			}
+
+			// Add h2
+			if (this.options.h2)
+			{
+				html += '<a href="#h2" class="h2">Heading 2</a>';
+			}
+
+			// Add h3
+			if (this.options.h3)
+			{
+				html += '<a href="#h3" class="h3">Heading 3</a>';
+			}
+
+			// Add ul
+			if (this.options.ul)
+			{
+				html += '<a href="#ul" class="ul">Unordered List</a>';
+			}
+
+			// Add ol
+			if (this.options.ol)
+			{
+				html += '<a href="#ol" class="ol">Ordered List</a>';
+			}
+
+			// Add a
+			if (this.options.a)
+			{
+				html += '<a href="#a" class="a">Link</a>';
+			}
+
+			// Add img
+			if (this.options.img)
+			{
+				html += '<a href="#img" class="img">Image</a>';
+			}
+
+			// Add blockquote
+			if (this.options.blockquote)
+			{
+				html += '<a href="#blockquote" class="blockquote">Blockquote</a>';
+			}
+
+			// Add code
+			if (this.options.code)
+			{
+				html += '<a href="#code" class="code">Code</a>';
+			}
+
+			// Close div
 			html += '</div>';
 
 			// Insert
@@ -84,7 +143,7 @@
 		h1: function()
 		{
 			var text = this.get().text;
-			text += '\n' + Array(text.length + 1).join('-');
+			text += '\n' + new Array(text.length + 1).join('-');
 			this.replace(text);
 		},
 
@@ -96,6 +155,29 @@
 		h3: function()
 		{
 			this.replace('### ' + this.get().text);
+		},
+
+		ul: function()
+		{
+			var rows = this.get().text.split('\n');
+			var replace = '';
+
+			$.each(rows, function(index, value)
+			{
+				if (value.length)
+				{
+					replace += '- ' + value + '\n';
+				}
+				else
+				{
+					if (replace === '' || rows.slice(index).join('').replace(/^\s+|\s+$/g, '').length === 0)
+					{
+						replace += '\n';
+					}
+				}
+			});
+
+			this.replace(replace.slice(0, -1));
 		},
 
 		ol: function()
@@ -123,34 +205,23 @@
 			this.replace(replace.slice(0, -1));
 		},
 
-		ul: function()
-		{
-			var rows = this.get().text.split('\n');
-			var replace = '';
-
-			$.each(rows, function(index, value)
-			{
-				if (value.length)
-				{
-					replace += '- ' + value + '\n';
-				}
-				else
-				{
-					if (replace === '' || rows.slice(index).join('').replace(/^\s+|\s+$/g, '').length === 0)
-					{
-						replace += '\n';
-					}
-				}
-			});
-
-			this.replace(replace.slice(0, -1));
-		},
-
 		a: function()
 		{
-			if (url = prompt('Enter your URL:'))
+			var url = prompt('Enter your URL:');
+
+			if (url)
 			{
 				this.replace('[' + this.get().text + '](' + url + ')');
+			}
+		},
+
+		img: function()
+		{
+			var url = prompt('Enter your image URL:');
+
+			if (url)
+			{
+				this.replace('![' + this.get().text + '](' + url + ')');
 			}
 		},
 
@@ -203,7 +274,7 @@
 							start: 0,
 							end: e.value.length,
 							length: 0
-						}
+						};
 					}
 
 					var re = e.createTextRange();
@@ -271,19 +342,18 @@
 				}
 
 			)();
-		},
-
+		}
 	};
 
-	$.fn['markbar'] = function(options)
+	$.fn.markbar = function(options)
 	{
 		return this.each(function()
 		{
 			if (!$.data(this, 'plugin_markbar'))
 			{
-				$.data(this, 'plugin_markbar', new plugin(this, options));
+				$.data(this, 'plugin_markbar', new Plugin(this, options));
 			}
 		});
-	}
+	};
 
 })(jQuery, window, document);
