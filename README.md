@@ -25,27 +25,22 @@ Markbar is super easy to use. Here is the most basic usage, which will enable al
 
 ## Customize
 
-If you want to limit which options are displayed in the toolbar, simply disable the ones you don't want:
+If you want to limit which options are displayed in the toolbar, simply disable the ones you don't want. Here is the complete list of all the available toolbar options:
 
 	$('textarea').markbar(
 	{
-		blockquote: false,
+		strong: true,
+		em: true,
+		h1: true,
+		h2: true,
+		h3: true,
+		ul: true,
+		ol: true,
+		a: true,
+		img: true,
+		blockquote: true,
 		code: false
 	});
-
-Here is the complete list of all the available toolbar options:
-
-- strong
-- em
-- h1
-- h2
-- h3
-- ul
-- ol
-- a
-- img
-- blockquote
-- code
 
 ## Questions or comments?
 
